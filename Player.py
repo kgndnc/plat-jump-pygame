@@ -19,6 +19,7 @@ class Player(pygame.sprite.Sprite):
         self.pos = vec((10, 385))  # (10, 385) konumunda yer alan birim vektor (konum vektoru)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
+        self.jumping = False
 
     def move(self, group):
         # constant effect of gravity
@@ -40,8 +41,6 @@ class Player(pygame.sprite.Sprite):
             self.acc.x = -ACC
         if pressed_keys[pygame.K_RIGHT]:
             self.acc.x = +ACC
-        if pressed_keys[pygame.K_UP] or pressed_keys[pygame.K_SPACE]:
-            self.jump(group)
 
         # apply friction (more velocity more friction) (x-axis)
         self.acc.x += self.vel.x * FRIC
@@ -61,17 +60,28 @@ class Player(pygame.sprite.Sprite):
     def jump(self, group):
         # only jump if player is in contact with a platform
         hits = pygame.sprite.spritecollide(self, group, False)
-        if hits:
+        if hits and not self.jumping:
+            self.jumping = True
             self.vel.y = -18
+
+    def cancel_jump(self):
+        # decrease y velocity when player doesn't hold
+        # the jump button
+        if self.jumping and self.vel.y < -4:
+            self.vel.y = -4
 
     def update(self, group):
         # Return a list containing all Sprites in a Group
-        # that intersect with another Sprite.
+        # that intersect with another Sprite(first argument).
         hits = pygame.sprite.spritecollide(self, group, False)
 
         # set the y velocity 0 if it was falling down
         # otherwise don't set it to 0 or else jump is nullified
         if self.vel.y > 0:
             if hits:
-                self.vel.y = 0
-                self.pos.y = hits[0].rect.top + 1
+                # This makes sure that the “landing” isn’t registered
+                # until the player’s y-position has not gone above the bottom of the platform
+                if self.pos.y < hits[0].rect.bottom:
+                    self.vel.y = 0
+                    self.pos.y = hits[0].rect.top + 1
+                    self.jumping = False

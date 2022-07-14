@@ -121,6 +121,12 @@ while running:
         if event.type == pygame.QUIT:
             pygame.quit()
             sys.exit()
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                P1.jump(platforms)
+        if event.type == pygame.KEYUP:
+            if event.key == pygame.K_SPACE or event.key == pygame.K_UP:
+                P1.cancel_jump()
 
     display_surface.fill("black")
     display_surface.blit(*show_time())
@@ -144,7 +150,6 @@ while running:
     if (len(platforms)) < 6:
         gen_rand_platforms()
 
-    print(len(platforms))
     # ***
 
     pygame.display.set_caption(f"Game (FPS: {clock.get_fps().__format__('.2f') })")
