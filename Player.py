@@ -29,10 +29,10 @@ class Player(pygame.sprite.Sprite):
         pressed_keys = pygame.key.get_pressed()
 
         """
-            Δx = ΔV . t
-            Δv = Δa . t   
+            Δx = ΔV . t            
+            Δv = Δa . t  
 
-            Δx = v  + 1/2 a . t^2      
+            Δx = v.t  + 1/2 a . t^2 
         """
 
         # -                           +

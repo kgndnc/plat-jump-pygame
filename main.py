@@ -1,3 +1,4 @@
+import random
 import sys
 import pygame
 from pygame.locals import *
@@ -6,11 +7,19 @@ import os
 
 
 class platform_cs(pygame.sprite.Sprite):
-    def __init__(self):
+    def __init__(self, initial=False):
         super().__init__()
-        self.surf = pygame.Surface((WIDTH, 20))
+        # updated to handle random level generation
+        self.surf = pygame.Surface((random.randint(50, 100), 12))
         self.surf.fill("blue")
-        self.rect = self.surf.get_rect(bottomleft=(0, HEIGHT))
+        # random position
+        if initial:
+            self.rect = self.surf.get_rect(center=(random.randint(0, WIDTH - 10), random.randint(0, HEIGHT - 30)))
+        else:
+            # generate platforms above the screen (out of bounds) and at the top
+            self.rect = self.surf.get_rect(
+                center=(random.randint(0, WIDTH - 10), random.randint(-HEIGHT + 30, HEIGHT // 3 - 10))
+            )
 
 
 # Constants
@@ -61,6 +70,10 @@ def draw_lines():
 
 # Instantiate entities
 PT1 = platform_cs()
+PT1.surf = pygame.Surface((WIDTH, 20))
+PT1.surf.fill((255, 0, 0))
+PT1.rect = PT1.surf.get_rect(center=(WIDTH / 2, HEIGHT - 10))
+
 P1 = Player()
 
 # sprite groups
@@ -73,6 +86,34 @@ platforms.add(PT1)
 
 clock = pygame.time.Clock()
 running = True
+
+# initial random platforms
+for x in range(random.randint(5, 6)):
+    pl = platform_cs(initial=True)
+    platforms.add(pl)
+    all_sprites.add(pl)
+
+
+def gen_rand_platforms():
+    """
+    another approach implement if you want
+    - find the top platform
+    - set a lower boundary for the new platform that is above this
+    - check to make sure that the lower boundary is off the screen (above what is visible)
+    - set an upper boundry that is close enough to the top platform that P1 can jump to it
+    - choose a random position between the lower bound and the upper bound
+    """
+
+    for x in range(random.randint(5, 6)):
+        width = random.randrange(50, 100)
+        p = platform_cs()
+        # p.rect.center = (random.randrange(0, WIDTH - width), random.randrange(-150, 70))
+        platforms.add(p)
+        all_sprites.add(p)
+
+
+gen_rand_platforms()
+
 
 # game loop
 while running:
@@ -91,6 +132,20 @@ while running:
     P1.update(platforms)
 
     pygame.display.update()
+
+    # ***
+    if P1.rect.top <= HEIGHT // 3:
+        P1.pos.y += abs(P1.vel.y)
+        for plat in platforms:
+            plat.rect.y += abs(P1.vel.y)
+            if plat.rect.top >= HEIGHT:
+                plat.kill()
+
+    if (len(platforms)) < 6:
+        gen_rand_platforms()
+
+    print(len(platforms))
+    # ***
 
     pygame.display.set_caption(f"Game (FPS: {clock.get_fps().__format__('.2f') })")
 
