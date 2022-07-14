@@ -4,6 +4,7 @@ WIDTH, HEIGHT = 800, 600
 
 ACC = 0.5
 FRIC = -0.06
+GRAVITY = 0.5
 vec = pygame.math.Vector2
 
 
@@ -19,8 +20,11 @@ class Player(pygame.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
 
-    def move(self):
-        self.acc = vec(0, 0)
+    def move(self, group):
+        # constant effect of gravity
+        # constant vertical acceleration -> Gravity
+        # only nullify it when player stands on firm ground (platform in this game)
+        self.acc = vec(0, GRAVITY)
 
         pressed_keys = pygame.key.get_pressed()
 
@@ -36,6 +40,8 @@ class Player(pygame.sprite.Sprite):
             self.acc.x = -ACC
         if pressed_keys[pygame.K_RIGHT]:
             self.acc.x = +ACC
+        if pressed_keys[pygame.K_UP] or pressed_keys[pygame.K_SPACE]:
+            self.jump(group)
 
         # apply friction (more velocity more friction) (x-axis)
         self.acc.x += self.vel.x * FRIC
@@ -51,3 +57,21 @@ class Player(pygame.sprite.Sprite):
 
         # apply the changes to the player rectangle
         self.rect.midbottom = self.pos
+
+    def jump(self, group):
+        # only jump if player is in contact with a platform
+        hits = pygame.sprite.spritecollide(self, group, False)
+        if hits:
+            self.vel.y = -18
+
+    def update(self, group):
+        # Return a list containing all Sprites in a Group
+        # that intersect with another Sprite.
+        hits = pygame.sprite.spritecollide(self, group, False)
+
+        # set the y velocity 0 if it was falling down
+        # otherwise don't set it to 0 or else jump is nullified
+        if self.vel.y > 0:
+            if hits:
+                self.vel.y = 0
+                self.pos.y = hits[0].rect.top + 1

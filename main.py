@@ -27,7 +27,7 @@ display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
 pygame.mouse.set_cursor(pygame.cursors.Cursor(SYSTEM_CURSOR_HAND))
 pygame.display.set_caption("Game")
 
-time_font = pygame.font.SysFont("Consolas", 40)
+time_font = pygame.font.SysFont("Consolas", 26)
 
 
 def show_time():
@@ -43,8 +43,7 @@ def show_time():
     )
     time_rect = time_surf.get_rect()
 
-    time_rect.centerx = WIDTH // 2
-    time_rect.centery = HEIGHT // 2
+    time_rect.midtop = (WIDTH // 2, 10)
 
     return time_surf, time_rect
 
@@ -64,9 +63,13 @@ def draw_lines():
 PT1 = platform_cs()
 P1 = Player()
 
+# sprite groups
 all_sprites = pygame.sprite.Group()
 all_sprites.add(P1)
 all_sprites.add(PT1)
+
+platforms = pygame.sprite.Group()
+platforms.add(PT1)
 
 clock = pygame.time.Clock()
 running = True
@@ -79,12 +82,16 @@ while running:
             sys.exit()
 
     display_surface.fill("black")
-    # display_surface.blit(*show_time())
+    display_surface.blit(*show_time())
 
     for entity in all_sprites:
         display_surface.blit(entity.surf, entity.rect)
 
-    P1.move()
+    P1.move(platforms)
+    P1.update(platforms)
 
     pygame.display.update()
+
+    pygame.display.set_caption(f"Game (FPS: {clock.get_fps().__format__('.2f') })")
+
     clock.tick(60)
