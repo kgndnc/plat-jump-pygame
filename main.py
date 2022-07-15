@@ -9,17 +9,9 @@ import os
 class platform_cs(pygame.sprite.Sprite):
     def __init__(self, initial=False):
         super().__init__()
-        # updated to handle random level generation
         self.surf = pygame.Surface((random.randint(50, 100), 12))
         self.surf.fill("blue")
-        # random position
-        if initial:
-            self.rect = self.surf.get_rect(center=(random.randint(0, WIDTH - 10), random.randint(0, HEIGHT - 30)))
-        else:
-            # generate platforms above the screen (out of bounds) and at the top
-            self.rect = self.surf.get_rect(
-                center=(random.randint(0, WIDTH - 10), random.randint(-HEIGHT + 30, HEIGHT // 3 - 10))
-            )
+        self.rect = self.surf.get_rect(center=(random.randint(0, WIDTH - 10), random.randint(0, HEIGHT - 30)))
 
 
 # Constants
@@ -105,10 +97,10 @@ def gen_rand_platforms():
     - choose a random position between the lower bound and the upper bound
     """
 
-    for x in range(random.randint(5, 6)):
+    while len(platforms) < 7:
         width = random.randrange(50, 100)
         p = platform_cs()
-        # p.rect.center = (random.randrange(0, WIDTH - width), random.randrange(-150, 70))
+        p.rect.center = (random.randrange(0, WIDTH - width), random.randrange(-50, 0))
         platforms.add(p)
         all_sprites.add(p)
 
@@ -141,28 +133,10 @@ while running:
             # display_surface.blit(entity.info_surf, entity.info_rect)
 
             # velocity vector
-            pygame.draw.line(
-                display_surface,
-                "white",
-                entity.rect.center,
-                (
-                    entity.rect.centerx + (entity.vel.x * 4 if entity.vel.x != 0 else entity.vel.x),
-                    entity.rect.top + (entity.vel.y * 4 if entity.vel.y != 0 else entity.vel.y),
-                ),
-                2,
-            )
+            entity.draw_vel_vector(display_surface)
 
             # acc vector
-            pygame.draw.line(
-                display_surface,
-                "cyan",
-                entity.rect.center,
-                (
-                    (entity.rect.centerx + (entity.acc.x * 20 if abs(entity.acc.x) >= 0.1 else entity.acc.x)),
-                    (entity.rect.top + entity.acc.y + 50),
-                ),
-                2,
-            )
+            entity.draw_acc_vector(display_surface)
         else:
             display_surface.blit(entity.surf, entity.rect)
 
@@ -179,7 +153,7 @@ while running:
             if plat.rect.top >= HEIGHT:
                 plat.kill()
 
-    if (len(platforms)) < 6:
+    if (len(platforms)) < 7:
         gen_rand_platforms()
 
     # ***

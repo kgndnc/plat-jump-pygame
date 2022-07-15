@@ -74,15 +74,43 @@ class Player(pygame.sprite.Sprite):
         hits = pygame.sprite.spritecollide(self, group, False)
         if hits and not self.jumping:
             self.jumping = True
-            self.vel.y = -18
+            self.vel.y = -15
 
     def cancel_jump(self):
         # decrease y velocity when player doesn't hold
         # the jump button
-        if self.jumping and self.vel.y < -4:
-            self.vel.y = -4
+        if self.jumping and self.vel.y < -3:
+            self.vel.y = -3
+
+    def draw_vel_vector(self, display_surface):
+        pygame.draw.line(
+            display_surface,
+            "white",
+            self.rect.center,
+            (
+                self.rect.centerx + (self.vel.x * 4 if self.vel.x != 0 else self.vel.x),
+                self.rect.top + (self.vel.y * 4 if self.vel.y != 0 else self.vel.y),
+            ),
+            2,
+        )
+
+    def draw_acc_vector(self, display_surface):
+        pygame.draw.line(
+            display_surface,
+            "cyan",
+            self.rect.center,
+            (
+                (self.rect.centerx + (self.acc.x * 20 if abs(self.acc.x) >= 0.1 else self.acc.x)),
+                (self.rect.top + self.acc.y + 50),
+            ),
+            2,
+        )
 
     def update(self, group):
+
+        # limit falling speed
+        if self.vel.y > 10:
+            self.vel.y = 10
         # Return a list containing all Sprites in a Group
         # that intersect with another Sprite(first argument).
         hits = pygame.sprite.spritecollide(self, group, False)
