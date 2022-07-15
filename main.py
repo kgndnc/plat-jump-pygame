@@ -81,31 +81,64 @@ clock = pygame.time.Clock()
 running = True
 
 # initial random platforms
-for x in range(random.randint(5, 6)):
-    pl = platform_cs(initial=True)
-    platforms.add(pl)
-    all_sprites.add(pl)
+# for x in range(random.randint(5, 6)):
+#     pl = platform_cs(initial=True)
+#     platforms.add(pl)
+#     all_sprites.add(pl)
+
+
+# text = ""
+
+# count_surf = info_font.render(text, True, "white", "red")
+# count_rect = count_surf.get_rect()
+# count_rect.topleft = (0, 0)
+
+
+def show_count():
+    global text
+    text = f"Platform count: {len(platforms)}"
+    count_surf = info_font.render(text, True, "white", "red")
+    count_rect = count_surf.get_rect()
+    count_rect.topleft = (0, 0)
+    display_surface.blit(count_surf, count_rect)
 
 
 def gen_rand_platforms():
-    """
-    another approach implement if you want
-    - find the top platform
-    - set a lower boundary for the new platform that is above this
-    - check to make sure that the lower boundary is off the screen (above what is visible)
-    - set an upper boundry that is close enough to the top platform that P1 can jump to it
-    - choose a random position between the lower bound and the upper bound
-    """
+    # list of platforms then add
 
-    while len(platforms) < 7:
-        width = random.randrange(50, 100)
+    platform_list = []
+
+    # generate 7 platforms
+    for i in range(0, 7):
         p = platform_cs()
-        p.rect.center = (random.randrange(0, WIDTH - width), random.randrange(-50, 0))
-        platforms.add(p)
-        all_sprites.add(p)
 
+        # make sure they're off screen (you'll most likely change y value of -50 because it may cause infinite loop)
+        p.rect.center = (random.randrange(0, WIDTH - 30), random.randrange(-30, 0))
 
-gen_rand_platforms()
+        if i > 0:
+            prev_plat = platform_list[i - 1]
+            prev_platx = prev_plat.rect.x
+            prev_platy = prev_plat.rect.y
+            y_range = prev_platy - 180, prev_platy - 100
+
+            p.rect.center = (random.randrange(0, WIDTH - 20), random.randrange(*y_range))
+
+        else:
+            # önceki platformların en üstündekine bak
+            prev_plat = platforms.sprites()[-1]
+
+            prev_plat.surf.fill("maroon")
+
+            prev_platx = prev_plat.rect.x
+            prev_platy = prev_plat.rect.y
+            y_range = prev_platy - 90, prev_platy - 30
+
+            p.rect.center = (random.randrange(0, WIDTH - 20), random.randrange(*y_range))
+
+        platform_list.append(p)
+
+    all_sprites.add(platform_list)
+    platforms.add(platform_list)
 
 
 # game loop
@@ -124,9 +157,6 @@ while running:
     display_surface.fill("black")
     display_surface.blit(*show_time())
 
-    # P1.move(platforms)
-    # P1.update(platforms)
-
     for entity in all_sprites:
         if isinstance(entity, Player):
             display_surface.blit(entity.surf, entity.rect)
@@ -143,6 +173,8 @@ while running:
     P1.move(platforms)
     P1.update(platforms)
 
+    show_count()
+
     pygame.display.update()
 
     # ***
@@ -157,6 +189,8 @@ while running:
         gen_rand_platforms()
 
     # ***
+    if len(platforms) != 7:
+        print(len(platforms))
 
     pygame.display.set_caption(f"Game (FPS: {clock.get_fps().__format__('.2f') })")
 

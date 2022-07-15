@@ -74,7 +74,7 @@ class Player(pygame.sprite.Sprite):
         hits = pygame.sprite.spritecollide(self, group, False)
         if hits and not self.jumping:
             self.jumping = True
-            self.vel.y = -15
+            self.vel.y = -18
 
     def cancel_jump(self):
         # decrease y velocity when player doesn't hold
