@@ -37,6 +37,7 @@ pygame.mouse.set_cursor(pygame.cursors.Cursor(SYSTEM_CURSOR_HAND))
 pygame.display.set_caption("Game")
 
 time_font = pygame.font.SysFont("Consolas", 26)
+info_font = pygame.font.SysFont("Consolas", 20)
 
 
 def show_time():
@@ -131,8 +132,39 @@ while running:
     display_surface.fill("black")
     display_surface.blit(*show_time())
 
+    # P1.move(platforms)
+    # P1.update(platforms)
+
     for entity in all_sprites:
-        display_surface.blit(entity.surf, entity.rect)
+        if isinstance(entity, Player):
+            display_surface.blit(entity.surf, entity.rect)
+            # display_surface.blit(entity.info_surf, entity.info_rect)
+
+            # velocity vector
+            pygame.draw.line(
+                display_surface,
+                "white",
+                entity.rect.center,
+                (
+                    entity.rect.centerx + (entity.vel.x * 4 if entity.vel.x != 0 else entity.vel.x),
+                    entity.rect.top + (entity.vel.y * 4 if entity.vel.y != 0 else entity.vel.y),
+                ),
+                2,
+            )
+
+            # acc vector
+            pygame.draw.line(
+                display_surface,
+                "cyan",
+                entity.rect.center,
+                (
+                    (entity.rect.centerx + (entity.acc.x * 20 if abs(entity.acc.x) >= 0.1 else entity.acc.x)),
+                    (entity.rect.top + entity.acc.y + 50),
+                ),
+                2,
+            )
+        else:
+            display_surface.blit(entity.surf, entity.rect)
 
     P1.move(platforms)
     P1.update(platforms)

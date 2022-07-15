@@ -1,11 +1,15 @@
 import pygame
 
+pygame.font.init()
+
 WIDTH, HEIGHT = 800, 600
 
 ACC = 0.5
 FRIC = -0.06
 GRAVITY = 0.5
 vec = pygame.math.Vector2
+
+info_font = pygame.font.SysFont("Consolas", 18)
 
 
 class Player(pygame.sprite.Sprite):
@@ -20,6 +24,14 @@ class Player(pygame.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.jumping = False
+
+        # info rect
+        text = f"Pos:{int(self.pos.x),int(self.pos.x)} Acc:{(self.acc.x).__format__('.2f'),(self.acc.y).__format__('.2f')} Vel:{(self.vel.x).__format__('.2f'),(self.vel.y).__format__('.2f')}"
+
+        self.info_surf = info_font.render(text, True, "white", "red")
+        self.info_rect = self.info_surf.get_rect()
+        self.info_rect.center = self.rect.centerx, self.rect.centery - 30
+        # pygame.Rect(self.pos.x, self.pos.y, 40, 20)
 
     def move(self, group):
         # constant effect of gravity
@@ -85,3 +97,8 @@ class Player(pygame.sprite.Sprite):
                     self.vel.y = 0
                     self.pos.y = hits[0].rect.top + 1
                     self.jumping = False
+
+        self.info_rect.center = (self.rect.centerx, self.rect.centery - 30)
+        text = f"Pos:{int(self.pos.x),int(self.pos.x)} Acc:{(self.acc.x).__format__('.2f'),(self.acc.y).__format__('.2f')} Vel:{(self.vel.x).__format__('.2f'),(self.vel.y).__format__('.2f')}"
+
+        # self.info_surf = info_font.render(text, True, "white", "red")
