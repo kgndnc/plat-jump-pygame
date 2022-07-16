@@ -91,8 +91,8 @@ class Player(pygame.sprite.Sprite):
     def cancel_jump(self):
         # decrease y velocity when player doesn't hold
         # the jump button
-        if self.jumping and self.vel.y < -3:
-            self.vel.y = -3
+        if self.jumping and self.vel.y < -2:
+            self.vel.y = -2
 
     def draw_vel_vector(self, display_surface):
         pygame.draw.line(

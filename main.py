@@ -9,8 +9,6 @@ import os
 
 from utils import check_hi_score, read_hi_scores
 
-# TODO: Moving Platforms
-
 
 class platform_cs(pygame.sprite.Sprite):
     def __init__(self, initial=False):
@@ -18,6 +16,26 @@ class platform_cs(pygame.sprite.Sprite):
         self.surf = pygame.Surface((random.randint(50, 100), 12))
         self.surf.fill("blue")
         self.rect = self.surf.get_rect(center=(random.randint(0, WIDTH - 10), random.randint(0, HEIGHT - 30)))
+
+        # moving platform
+        self.speed_quo = random.randint(1, 2)
+        self.speed = random.choice([-1, 0, 0, 0, 1])
+        if self.speed != 0:
+            self.speed *= self.speed_quo
+
+        self.moving = True
+
+    def move(self, player):
+        hits = self.rect.colliderect(player.rect)
+        if self.moving == True:
+            self.rect.move_ip(self.speed, 0)
+            # positioning on moving platforms
+            if hits:
+                player.pos += (self.speed, 0)
+            if self.speed > 0 and self.rect.left > WIDTH:
+                self.rect.right = 0
+            if self.speed < 0 and self.rect.right < 0:
+                self.rect.left = WIDTH
 
 
 # Constants
@@ -180,6 +198,7 @@ def main():
     PT1.surf = pygame.Surface((WIDTH, 20))
     PT1.surf.fill((255, 0, 0))
     PT1.rect = PT1.surf.get_rect(center=(WIDTH / 2, HEIGHT - 10))
+    PT1.moving = False
 
     P1 = Player()
     hi_score_achieved = False
@@ -228,6 +247,7 @@ def main():
                 # acc vector
                 entity.draw_acc_vector(display_surface)
             else:
+                entity.move(player=P1)
                 display_surface.blit(entity.surf, entity.rect)
 
         P1.move(platforms)
