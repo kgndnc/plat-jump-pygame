@@ -1,6 +1,11 @@
 import pygame
 
+from utils import check_hi_score
+
 pygame.font.init()
+
+# Custom Event
+PLAYER_FALL = pygame.USEREVENT + 1
 
 WIDTH, HEIGHT = 800, 600
 
@@ -24,6 +29,9 @@ class Player(pygame.sprite.Sprite):
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.jumping = False
+
+        # score
+        self.score = 0
 
         # info rect
         text = f"Pos:{int(self.pos.x),int(self.pos.x)} Acc:{(self.acc.x).__format__('.2f'),(self.acc.y).__format__('.2f')} Vel:{(self.vel.x).__format__('.2f'),(self.vel.y).__format__('.2f')}"
@@ -69,6 +77,10 @@ class Player(pygame.sprite.Sprite):
         # apply the changes to the player rectangle
         self.rect.midbottom = self.pos
 
+        # set score
+        if self.vel.y < 0 and self.score < 4:
+            self.score += 0.1
+
     def jump(self, group):
         # only jump if player is in contact with a platform
         hits = pygame.sprite.spritecollide(self, group, False)
@@ -106,8 +118,11 @@ class Player(pygame.sprite.Sprite):
             2,
         )
 
-    def update(self, group):
+    def isInGame(self):
+        if self.rect.top > HEIGHT:
+            pygame.event.post(pygame.event.Event(PLAYER_FALL))
 
+    def update(self, group):
         # limit falling speed
         if self.vel.y > 10:
             self.vel.y = 10
@@ -126,7 +141,13 @@ class Player(pygame.sprite.Sprite):
                     self.pos.y = hits[0].rect.top + 1
                     self.jumping = False
 
-        self.info_rect.center = (self.rect.centerx, self.rect.centery - 30)
-        text = f"Pos:{int(self.pos.x),int(self.pos.x)} Acc:{(self.acc.x).__format__('.2f'),(self.acc.y).__format__('.2f')} Vel:{(self.vel.x).__format__('.2f'),(self.vel.y).__format__('.2f')}"
+        # Check whether character's on screen
+        self.isInGame()
 
-        # self.info_surf = info_font.render(text, True, "white", "red")
+        # score
+        # if the player is going up
+        # if self.vel.y < 0:
+        #     self.score += 1
+
+        # text = f"Pos:{int(self.pos.x),int(self.pos.x)} Acc:{(self.acc.x).__format__('.2f'),(self.acc.y).__format__('.2f')} Vel:{(self.vel.x).__format__('.2f'),(self.vel.y).__format__('.2f')}"
+        # self.info_rect.center = (self.rect.centerx, self.rect.centery - 30)
