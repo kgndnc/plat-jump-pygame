@@ -4,6 +4,7 @@ import sys
 import time
 import pygame
 from pygame.locals import *
+from Coin import Coin
 from Player import PLAYER_FALL, Player
 import os
 
@@ -36,6 +37,11 @@ class platform_cs(pygame.sprite.Sprite):
                 self.rect.right = 0
             if self.speed < 0 and self.rect.right < 0:
                 self.rect.left = WIDTH
+
+    def generateCoin(self):
+        if self.speed == 0:
+            global coins
+            coins.add(Coin((self.rect.centerx, self.rect.centery - 10)))
 
 
 # Constants
@@ -128,6 +134,7 @@ def gen_rand_platforms(platforms, all_sprites):
 
             p.rect.center = (random.randrange(0, WIDTH - 20), random.randrange(*y_range))
 
+        p.generateCoin()
         platform_list.append(p)
 
     all_sprites.add(platform_list)
@@ -211,6 +218,9 @@ def main():
     platforms = pygame.sprite.Group()
     platforms.add(PT1)
 
+    global coins
+    coins = pygame.sprite.Group()
+
     clock = pygame.time.Clock()
     running = True
 
@@ -250,6 +260,10 @@ def main():
                 entity.move(player=P1)
                 display_surface.blit(entity.surf, entity.rect)
 
+        for coin in coins:
+            display_surface.blit(coin.image, coin.rect)
+            coin.update(P1)
+
         P1.move(platforms)
         P1.update(platforms)
 
@@ -266,6 +280,9 @@ def main():
                 plat.rect.y += abs(P1.vel.y)
                 if plat.rect.top >= HEIGHT:
                     plat.kill()
+
+            for coin in coins:
+                coin.rect.centery += abs(P1.vel.y)
 
         if (len(platforms)) < 7:
             gen_rand_platforms(platforms, all_sprites)

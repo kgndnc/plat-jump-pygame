@@ -143,11 +143,3 @@ class Player(pygame.sprite.Sprite):
 
         # Check whether character's on screen
         self.isInGame()
-
-        # score
-        # if the player is going up
-        # if self.vel.y < 0:
-        #     self.score += 1
-
-        # text = f"Pos:{int(self.pos.x),int(self.pos.x)} Acc:{(self.acc.x).__format__('.2f'),(self.acc.y).__format__('.2f')} Vel:{(self.vel.x).__format__('.2f'),(self.vel.y).__format__('.2f')}"
-        # self.info_rect.center = (self.rect.centerx, self.rect.centery - 30)
