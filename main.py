@@ -148,7 +148,8 @@ def start_screen(isHiScore: bool, score):
 
     start_text_rect = start_text.get_rect(center=(WIDTH // 2, (HEIGHT * 2) // 3 + 50))
 
-    rect = pygame.draw.rect(display_surface, "purple", start_text_rect.inflate(120, 90), 0, 4)
+    pygame.draw.rect(display_surface, "black", (0, 40, WIDTH, HEIGHT), 0, 4)
+    pygame.draw.rect(display_surface, "purple", start_text_rect.inflate(120, 90), 0, 4)
 
     hiScores = read_hi_scores()
     x, y = WIDTH // 2, 80
