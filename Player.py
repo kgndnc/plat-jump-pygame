@@ -1,3 +1,4 @@
+import os
 import pygame
 
 from utils import check_hi_score
@@ -20,15 +21,43 @@ info_font = pygame.font.SysFont("Consolas", 18)
 class Player(pygame.sprite.Sprite):
     def __init__(self):
         super().__init__()
-        self.surf = pygame.Surface((30, 30))
-        self.surf.fill("green")
-        self.rect = self.surf.get_rect()
+        self.image = pygame.image.load(os.path.join("Assets", "char.png")).convert()
+        self.jump_img = pygame.image.load(os.path.join("Assets", "jump.png")).convert()
+        self.walk_img = [
+            pygame.image.load(os.path.join("Assets", "walk.png")).convert(),
+            pygame.image.load(os.path.join("Assets", "run.png")).convert(),
+        ]
+
+        # (253, 77, 211)
+        self.image.set_colorkey((253, 77, 211))
+        self.jump_img.set_colorkey((253, 77, 211))
+        self.walk_img[0].set_colorkey((253, 77, 211))
+        self.walk_img[1].set_colorkey((253, 77, 211))
+
+        self.image = pygame.transform.scale(self.image, (48, 48))
+        self.jump_img = pygame.transform.scale(self.jump_img, (48, 48))
+        self.walk_img[0] = pygame.transform.scale(self.walk_img[0], (48, 48))
+        self.walk_img[1] = pygame.transform.scale(self.walk_img[1], (48, 48))
+
+        self.surf = self.image
+
+        self.flipped_image = pygame.transform.flip(self.image, True, False)
+        self.flipped_jump_img = pygame.transform.flip(self.jump_img, True, False)
+        self.flipped_walk_img = [
+            pygame.transform.flip(self.walk_img[0], True, False),
+            pygame.transform.flip(self.walk_img[1], True, False),
+        ]
+        self.animation_counter = 0
+
+        self.rect = self.image.get_rect()
+        self.rect.size = [36, 48]
 
         # movement
         self.pos = vec((10, 385))  # (10, 385) konumunda yer alan birim vektor (konum vektoru)
         self.vel = vec(0, 0)
         self.acc = vec(0, 0)
         self.jumping = False
+        self.facing_right = True
 
         # score
         self.score = 0
@@ -59,8 +88,10 @@ class Player(pygame.sprite.Sprite):
         # -                           +
         if pressed_keys[pygame.K_LEFT]:
             self.acc.x = -ACC
+            self.facing_right = False
         if pressed_keys[pygame.K_RIGHT]:
             self.acc.x = +ACC
+            self.facing_right = True
 
         # apply friction (more velocity more friction) (x-axis)
         self.acc.x += self.vel.x * FRIC
@@ -143,3 +174,27 @@ class Player(pygame.sprite.Sprite):
 
         # Check whether character's on screen
         self.isInGame()
+
+        # flip char image
+
+        if self.jumping:
+            if self.facing_right:
+                self.surf = self.jump_img
+            else:
+                self.surf = self.flipped_jump_img
+        else:
+            if abs(self.vel.x) > 1:
+                if self.facing_right:
+                    self.surf = self.walk_img[self.animation_counter // 15]
+                    self.animation_counter += 1
+                else:
+                    self.surf = self.flipped_walk_img[self.animation_counter // 15]
+                    self.animation_counter += 1
+            else:
+                if self.facing_right:
+                    self.surf = self.image
+                else:
+                    self.surf = self.flipped_image
+
+        if self.animation_counter >= 30:
+            self.animation_counter = 0

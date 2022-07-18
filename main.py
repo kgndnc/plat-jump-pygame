@@ -1,21 +1,29 @@
-from platform import python_branch
+import os
 import random
 import sys
-import time
 import pygame
 from pygame.locals import *
 from Coin import Coin
 from Player import PLAYER_FALL, Player
-import os
-
 from utils import check_hi_score, read_hi_scores
 
 
 class platform_cs(pygame.sprite.Sprite):
-    def __init__(self, initial=False):
+    def __init__(self, width=0):
         super().__init__()
-        self.surf = pygame.Surface((random.randint(50, 100), 12))
-        self.surf.fill("blue")
+
+        width = random.choice([48, 64, 64, 80, 80, 96, 96]) if width == 0 else width
+
+        if width <= 128:
+            self.image = pygame.image.load(os.path.join("Assets", f"grass_{width}x24.png"))
+        else:
+            self.surf = pygame.Surface((width, 24))
+            self.image.fill("red")
+            # self.image.set_colorkey("black")
+            # self.surf = self.image
+
+        self.surf = self.image
+
         self.rect = self.surf.get_rect(center=(random.randint(0, WIDTH - 10), random.randint(0, HEIGHT - 30)))
 
         # moving platform
@@ -41,7 +49,7 @@ class platform_cs(pygame.sprite.Sprite):
     def generateCoin(self):
         if self.speed == 0:
             global coins
-            coins.add(Coin((self.rect.centerx, self.rect.centery - 10)))
+            coins.add(Coin((self.rect.centerx, self.rect.top - 10)))
 
 
 # Constants
@@ -55,8 +63,9 @@ vec = pygame.math.Vector2
 pygame.init()
 pygame.font.init()
 display_surface = pygame.display.set_mode((WIDTH, HEIGHT))
-pygame.mouse.set_visible(False)
-pygame.display.set_caption("Game")
+pygame.display.set_caption("Plat Jump")
+background = pygame.image.load(os.path.join("Assets", "background.png")).convert()
+# background = pygame.transform.scale(background, (WIDTH, HEIGHT), display_surface).convert()
 
 time_font = pygame.font.SysFont("Consolas", 26)
 info_font = pygame.font.SysFont("Consolas", 20)
@@ -84,7 +93,7 @@ def show_score(score):
     score_surf = time_font.render(
         f"Score: {int(score)}",
         1,
-        "Green",
+        "#293241",
     )
     score_rect = score_surf.get_rect()
 
@@ -126,8 +135,6 @@ def gen_rand_platforms(platforms, all_sprites):
             # get the top platform of previous platforms
             prev_plat = platforms.sprites()[-1]
 
-            prev_plat.surf.fill("maroon")
-
             prev_platx = prev_plat.rect.x
             prev_platy = prev_plat.rect.y
             y_range = prev_platy - 90, prev_platy - 30
@@ -143,36 +150,47 @@ def gen_rand_platforms(platforms, all_sprites):
 
 def start_screen(isHiScore: bool, score):
     text = "Press 'space' to start"
-    start_text = time_font.render(text, 1, "white")
+    start_text = time_font.render(text, 1, "black")
+
+    title = "HI-SCORE LIST"
+    title_text = time_font.render(title, 1, "antiquewhite")
+
     space_pos = 0
 
-    start_text_rect = start_text.get_rect(center=(WIDTH // 2, (HEIGHT * 2) // 3 + 50))
+    start_text_rect = start_text.get_rect(center=(WIDTH // 2, (HEIGHT * 2) // 3 + 80))
+    title_text_rect = title_text.get_rect(center=(WIDTH // 2, 71))
+    # 0b2434
 
-    pygame.draw.rect(display_surface, "black", (0, 40, WIDTH, HEIGHT), 0, 4)
-    pygame.draw.rect(display_surface, "purple", start_text_rect.inflate(120, 90), 0, 4)
+    pygame.draw.rect(display_surface, "#3d5a80", (100, 40, WIDTH - 200, HEIGHT - 80), 0, 4)
+    pygame.draw.rect(display_surface, "antiquewhite", start_text_rect.inflate(120, 90), 0, 4)
+    display_surface.blit(title_text, title_text_rect)
 
     hiScores = read_hi_scores()
-    x, y = WIDTH // 2, 80
+    x, y = WIDTH // 2, 114
     if isHiScore:
         score_index = hiScores.index(int(score))
-        for line_index, line in enumerate(hiScores):
+    else:
+        score_index = -1
+    for line_index, line in enumerate(hiScores):
 
-            color = "orange" if line_index == score_index else "purple"
+        color = "orange" if line_index == score_index else "antiquewhite"
 
-            hi_text = f"{line_index+1}. {line}"
-            hi_text_surf = time_font.render(hi_text, 1, color, "black")
-            hi_text_rect = hi_text_surf.get_rect(center=(x, y))
+        hi_text = f"{line_index+1}. {line}"
+        hi_text_surf = time_font.render(hi_text, 1, color)
+        hi_text_rect = hi_text_surf.get_rect(center=(x, y))
 
-            display_surface.blit(hi_text_surf, hi_text_rect)
-            y += 30
+        display_surface.blit(hi_text_surf, hi_text_rect)
+        y += 30
 
-        y += 50
+    y += 50
+
+    if isHiScore:
         text = "HI-SCORE!!!"
-        hi_text_surf = time_font.render(text, 1, "white")
+        hi_text_surf = time_font.render(text, 1, "black")
         hi_text_rect = hi_text_surf.get_rect(center=(x, y))
         display_surface.blit(hi_text_surf, hi_text_rect)
 
-        space_pos = (start_text_rect.left, start_text_rect.top + 20)
+    space_pos = (start_text_rect.left, start_text_rect.top + 20)
 
     space_pos = space_pos if not space_pos == 0 else start_text_rect.topleft
 
@@ -203,8 +221,10 @@ def main():
 
     # Instantiate entities
     PT1 = platform_cs()
-    PT1.surf = pygame.Surface((WIDTH, 20))
+    PT1.surf = pygame.Surface((WIDTH, 32))
     PT1.surf.fill((255, 0, 0))
+    PT1.surf = pygame.image.load(os.path.join("Assets", "grass_dead_800x32.png"))
+
     PT1.rect = PT1.surf.get_rect(center=(WIDTH / 2, HEIGHT - 10))
     PT1.moving = False
 
@@ -227,6 +247,7 @@ def main():
 
     # game loop
     while running:
+        display_surface.blit(background, (0, 0))
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 pygame.quit()
@@ -243,20 +264,17 @@ def main():
                 running = False
                 break
 
-        display_surface.fill("black")
         display_surface.blit(*show_score(P1.score))
 
         for entity in all_sprites:
             if isinstance(entity, Player):
                 display_surface.blit(entity.surf, entity.rect)
-                # pos, acc, vel values
-                # display_surface.blit(entity.info_surf, entity.info_rect)
 
-                # velocity vector
-                entity.draw_vel_vector(display_surface)
+                # # velocity vector
+                # entity.draw_vel_vector(display_surface)
+                # # acc vector
+                # entity.draw_acc_vector(display_surface)
 
-                # acc vector
-                entity.draw_acc_vector(display_surface)
             else:
                 entity.move(player=P1)
                 display_surface.blit(entity.surf, entity.rect)
@@ -267,8 +285,6 @@ def main():
 
         P1.move(platforms)
         P1.update(platforms)
-
-        show_count(platforms)
 
         pygame.display.update()
 
@@ -290,7 +306,7 @@ def main():
 
         # ***
 
-        pygame.display.set_caption(f"Game (FPS: {clock.get_fps().__format__('.2f') })")
+        pygame.display.set_caption(f"Plat Jump (FPS: {clock.get_fps().__format__('.2f') })")
 
         if not running:
             start_screen(hi_score_achieved, player_score)
