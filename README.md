@@ -1,6 +1,6 @@
 # Plat Jumper
 
-Plat Jumper is an endless runner platform game where you try to reach as high as possible by jumping on the platforms. This game is developed with Python's [Pygame](https://www.pygame.org/) library.
+Plat Jumper is an endless runner platform game where you try to reach as high as possible by jumping on the platforms. This game was developed with Python's [Pygame](https://www.pygame.org/) library.
 
 ## Demo of the Game
 
